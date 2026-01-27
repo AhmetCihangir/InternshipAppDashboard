@@ -47,7 +47,9 @@ const WidgetPieChart = () => {
                 flexDirection: 'column',
                 alignItems: 'center',
                 gap: 2,
-                minHeight: '70vh'
+                minHeight: '70vh',
+                overflowY: 'auto',
+                backgroundColor: '#03045e'
             }}>
                 {loading && (
                     <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '200px' }}>
@@ -60,7 +62,7 @@ const WidgetPieChart = () => {
                         Failed to load productivity data: {error}
                         <br />
                         <Typography variant="caption" sx={{ mt: 1 }}>
-                            Make sure the Flask backend is running on port 5000
+                            Make sure the Flask backend is running on port 5001
                         </Typography>
                     </Alert>
                 )}
@@ -87,46 +89,74 @@ const WidgetPieChart = () => {
                             />
                         </Box>
 
-                        {/* Charts */}
-                        <Box sx={{
-                            display: 'flex',
-                            flexDirection: { xs: 'column', md: 'row' },
-                            justifyContent: 'center',
-                            alignItems: 'center',
-                            gap: 3,
-                            width: '100%'
-                        }}>
-                            {/* Efficiency Gauge Chart */}
+                        {/* Row 1: Efficiency Gauge + Difficulty Pie */}
+                        <ChartRow>
                             <ChartImage
                                 base64={data.charts.efficiency_bar_base64}
                                 alt="Efficiency Score Gauge"
                             />
-
-                            {/* Difficulty Pie Chart */}
                             <ChartImage
                                 base64={data.charts.difficulty_pie_base64}
                                 alt="Task Difficulty Distribution"
                             />
-                        </Box>
+                        </ChartRow>
 
-                        {/* Weekly Trend Chart */}
-                        <Box sx={{
-                            width: '100%',
-                            display: 'flex',
-                            justifyContent: 'center',
-                            mt: 2
-                        }}>
+                        {/* Row 2: Completion Status Pie + Incomplete by Section */}
+                        <ChartRow>
+                            <ChartImage
+                                base64={data.charts.completion_status_pie_base64}
+                                alt="Completion Status"
+                            />
+                            <ChartImage
+                                base64={data.charts.incomplete_by_section_bar_base64}
+                                alt="Incomplete Tasks by Section"
+                            />
+                        </ChartRow>
+
+                        {/* Row 3: Upcoming by User */}
+                        <ChartRow>
+                            <ChartImage
+                                base64={data.charts.upcoming_by_user_bar_base64}
+                                alt="Upcoming Tasks by User"
+                            />
+                        </ChartRow>
+
+                        {/* Row 4: Weekly Trend */}
+                        <ChartRow>
                             <ChartImage
                                 base64={data.charts.weekly_trend_base64}
                                 alt="Weekly Efficiency Trend"
                             />
-                        </Box>
+                        </ChartRow>
+
+                        {/* Row 5: Completion Over Time */}
+                        <ChartRow>
+                            <ChartImage
+                                base64={data.charts.completion_over_time_line_base64}
+                                alt="Task Completion Over Time"
+                            />
+                        </ChartRow>
                     </>
                 )}
             </Box>
         </Widget>
     );
 };
+
+// Chart Row Container
+const ChartRow = ({ children }) => (
+    <Box sx={{
+        display: 'flex',
+        flexDirection: { xs: 'column', md: 'row' },
+        justifyContent: 'center',
+        alignItems: 'center',
+        gap: 3,
+        width: '100%',
+        mb: 2
+    }}>
+        {children}
+    </Box>
+);
 
 // Reusable Stat Card Component
 const StatCard = ({ label, value, color }) => (

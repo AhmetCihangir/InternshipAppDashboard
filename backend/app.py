@@ -23,34 +23,41 @@ def get_mock_tasks():
     Generate mock task data for testing.
     Returns a list of task dictionaries with varied difficulty and completion status.
     
-    Schema: {'id': int, 'title': str, 'difficulty': int (1-5), 'is_completed': bool}
+    Schema: {'id': int, 'title': str, 'difficulty': int (1-5), 'is_completed': bool, 'status': str, 'assignee': str, 'created_at': str, 'completed_at': str or None}
     """
-    return [
+    from datetime import datetime, timedelta
+    import random
+    
+    base_date = datetime(2024, 1, 1)
+    
+    tasks = [
         # High difficulty completed tasks (good for efficiency)
-        {"id": 1, "title": "Implement API Authentication", "difficulty": 5, "is_completed": True},
-        {"id": 2, "title": "Database Schema Design", "difficulty": 4, "is_completed": True},
-        {"id": 3, "title": "Setup CI/CD Pipeline", "difficulty": 5, "is_completed": True},
+        {"id": 1, "title": "Implement API Authentication", "difficulty": 5, "is_completed": True, "status": "done", "assignee": "Alice", "created_at": (base_date + timedelta(days=random.randint(0,30))).strftime('%Y-%m-%d'), "completed_at": (base_date + timedelta(days=random.randint(31,60))).strftime('%Y-%m-%d')},
+        {"id": 2, "title": "Database Schema Design", "difficulty": 4, "is_completed": True, "status": "done", "assignee": "Bob", "created_at": (base_date + timedelta(days=random.randint(0,30))).strftime('%Y-%m-%d'), "completed_at": (base_date + timedelta(days=random.randint(31,60))).strftime('%Y-%m-%d')},
+        {"id": 3, "title": "Setup CI/CD Pipeline", "difficulty": 5, "is_completed": True, "status": "done", "assignee": "Charlie", "created_at": (base_date + timedelta(days=random.randint(0,30))).strftime('%Y-%m-%d'), "completed_at": (base_date + timedelta(days=random.randint(31,60))).strftime('%Y-%m-%d')},
         
         # Medium difficulty mixed
-        {"id": 4, "title": "Write Unit Tests", "difficulty": 3, "is_completed": True},
-        {"id": 5, "title": "Code Review Session", "difficulty": 2, "is_completed": True},
-        {"id": 6, "title": "API Documentation", "difficulty": 3, "is_completed": False},
-        {"id": 7, "title": "Bug Fix: Login Issue", "difficulty": 3, "is_completed": True},
+        {"id": 4, "title": "Write Unit Tests", "difficulty": 3, "is_completed": True, "status": "done", "assignee": "Diana", "created_at": (base_date + timedelta(days=random.randint(0,30))).strftime('%Y-%m-%d'), "completed_at": (base_date + timedelta(days=random.randint(31,60))).strftime('%Y-%m-%d')},
+        {"id": 5, "title": "Code Review Session", "difficulty": 2, "is_completed": True, "status": "done", "assignee": "Alice", "created_at": (base_date + timedelta(days=random.randint(0,30))).strftime('%Y-%m-%d'), "completed_at": (base_date + timedelta(days=random.randint(31,60))).strftime('%Y-%m-%d')},
+        {"id": 6, "title": "API Documentation", "difficulty": 3, "is_completed": False, "status": "doing", "assignee": "Bob", "created_at": (base_date + timedelta(days=random.randint(0,30))).strftime('%Y-%m-%d'), "completed_at": None},
+        {"id": 7, "title": "Bug Fix: Login Issue", "difficulty": 3, "is_completed": True, "status": "done", "assignee": "Charlie", "created_at": (base_date + timedelta(days=random.randint(0,30))).strftime('%Y-%m-%d'), "completed_at": (base_date + timedelta(days=random.randint(31,60))).strftime('%Y-%m-%d')},
         
         # Low difficulty tasks
-        {"id": 8, "title": "Update README", "difficulty": 1, "is_completed": True},
-        {"id": 9, "title": "Team Meeting Notes", "difficulty": 1, "is_completed": True},
-        {"id": 10, "title": "Email Status Report", "difficulty": 1, "is_completed": False},
+        {"id": 8, "title": "Update README", "difficulty": 1, "is_completed": True, "status": "done", "assignee": "Diana", "created_at": (base_date + timedelta(days=random.randint(0,30))).strftime('%Y-%m-%d'), "completed_at": (base_date + timedelta(days=random.randint(31,60))).strftime('%Y-%m-%d')},
+        {"id": 9, "title": "Team Meeting Notes", "difficulty": 1, "is_completed": True, "status": "done", "assignee": "Alice", "created_at": (base_date + timedelta(days=random.randint(0,30))).strftime('%Y-%m-%d'), "completed_at": (base_date + timedelta(days=random.randint(31,60))).strftime('%Y-%m-%d')},
+        {"id": 10, "title": "Email Status Report", "difficulty": 1, "is_completed": False, "status": "todo", "assignee": "Bob", "created_at": (base_date + timedelta(days=random.randint(0,30))).strftime('%Y-%m-%d'), "completed_at": None},
         
         # Incomplete high difficulty (impacts efficiency negatively)
-        {"id": 11, "title": "Microservices Migration", "difficulty": 5, "is_completed": False},
-        {"id": 12, "title": "Performance Optimization", "difficulty": 4, "is_completed": False},
+        {"id": 11, "title": "Microservices Migration", "difficulty": 5, "is_completed": False, "status": "doing", "assignee": "Charlie", "created_at": (base_date + timedelta(days=random.randint(0,30))).strftime('%Y-%m-%d'), "completed_at": None},
+        {"id": 12, "title": "Performance Optimization", "difficulty": 4, "is_completed": False, "status": "todo", "assignee": "Diana", "created_at": (base_date + timedelta(days=random.randint(0,30))).strftime('%Y-%m-%d'), "completed_at": None},
         
         # Additional varied tasks
-        {"id": 13, "title": "Frontend Integration", "difficulty": 4, "is_completed": True},
-        {"id": 14, "title": "Security Audit Prep", "difficulty": 4, "is_completed": True},
-        {"id": 15, "title": "Onboarding Docs", "difficulty": 2, "is_completed": False},
+        {"id": 13, "title": "Frontend Integration", "difficulty": 4, "is_completed": True, "status": "done", "assignee": "Alice", "created_at": (base_date + timedelta(days=random.randint(0,30))).strftime('%Y-%m-%d'), "completed_at": (base_date + timedelta(days=random.randint(31,60))).strftime('%Y-%m-%d')},
+        {"id": 14, "title": "Security Audit Prep", "difficulty": 4, "is_completed": True, "status": "done", "assignee": "Bob", "created_at": (base_date + timedelta(days=random.randint(0,30))).strftime('%Y-%m-%d'), "completed_at": (base_date + timedelta(days=random.randint(31,60))).strftime('%Y-%m-%d')},
+        {"id": 15, "title": "Onboarding Docs", "difficulty": 2, "is_completed": False, "status": "todo", "assignee": "Charlie", "created_at": (base_date + timedelta(days=random.randint(0,30))).strftime('%Y-%m-%d'), "completed_at": None},
     ]
+    
+    return tasks
 
 
 def get_mock_weekly_efficiency():
@@ -313,6 +320,179 @@ def generate_weekly_trend_chart(weekly_data):
     return _create_base64_image(fig)
 
 
+def generate_incomplete_tasks_by_section_bar_chart(tasks):
+    """
+    Generate a bar chart showing total incomplete tasks by section (To Do, Doing).
+    
+    Args:
+        tasks: List of task dictionaries
+        
+    Returns:
+        str: Base64 encoded PNG image string
+    """
+    incomplete_tasks = [task for task in tasks if not task["is_completed"]]
+    section_counts = {"To Do": 0, "Doing": 0}
+    for task in incomplete_tasks:
+        if task["status"] == "todo":
+            section_counts["To Do"] += 1
+        elif task["status"] == "doing":
+            section_counts["Doing"] += 1
+    
+    fig, ax = plt.subplots(figsize=(6, 4))
+    fig.patch.set_facecolor('#1a1a2e')
+    ax.set_facecolor('#1a1a2e')
+    
+    bars = ax.bar(section_counts.keys(), section_counts.values(), color=['#ff9500', '#ffd60a'], edgecolor='none', width=0.6)
+    
+    ax.set_title('Incomplete Tasks by Section', color='#caf0f8', fontsize=14, fontweight='bold', pad=20)
+    ax.set_ylabel('Number of Tasks', color='#caf0f8', fontsize=11)
+    ax.tick_params(axis='x', colors='#caf0f8')
+    ax.tick_params(axis='y', colors='#8892b0')
+    ax.spines['top'].set_visible(False)
+    ax.spines['right'].set_visible(False)
+    ax.spines['bottom'].set_color('#2d2d44')
+    ax.spines['left'].set_color('#2d2d44')
+    
+    # Add value labels
+    for bar in bars:
+        height = bar.get_height()
+        ax.text(bar.get_x() + bar.get_width()/2., height + 0.1, f'{int(height)}', ha='center', va='bottom', color='#ffffff', fontweight='bold')
+    
+    return _create_base64_image(fig)
+
+
+def generate_completion_status_pie_chart(tasks):
+    """
+    Generate a pie chart showing total tasks by completion status (Incomplete, Complete).
+    
+    Args:
+        tasks: List of task dictionaries
+        
+    Returns:
+        str: Base64 encoded PNG image string
+    """
+    complete_count = sum(1 for task in tasks if task["is_completed"])
+    incomplete_count = len(tasks) - complete_count
+    
+    labels = ['Complete', 'Incomplete']
+    sizes = [complete_count, incomplete_count]
+    colors = ['#00d4aa', '#ff3b30']
+    
+    fig, ax = plt.subplots(figsize=(6, 5))
+    fig.patch.set_facecolor('#1a1a2e')
+    ax.set_facecolor('#1a1a2e')
+    
+    wedges, texts, autotexts = ax.pie(
+        sizes, 
+        labels=labels, 
+        autopct='%1.1f%%',
+        colors=colors,
+        explode=[0.02, 0.02],
+        shadow=True,
+        startangle=90
+    )
+    
+    # Style the text
+    for text in texts:
+        text.set_color('#caf0f8')
+        text.set_fontsize(12)
+    for autotext in autotexts:
+        autotext.set_color('#1a1a2e')
+        autotext.set_fontweight('bold')
+        autotext.set_fontsize(10)
+    
+    ax.set_title('Tasks by Completion Status', color='#caf0f8', fontsize=14, fontweight='bold', pad=15)
+    
+    return _create_base64_image(fig)
+
+
+def generate_upcoming_tasks_by_user_bar_chart(tasks):
+    """
+    Generate a bar chart for total upcoming (incomplete) tasks for each responsible user.
+    
+    Args:
+        tasks: List of task dictionaries
+        
+    Returns:
+        str: Base64 encoded PNG image string
+    """
+    from collections import defaultdict
+    upcoming_tasks = [task for task in tasks if not task["is_completed"]]
+    user_counts = defaultdict(int)
+    for task in upcoming_tasks:
+        user_counts[task["assignee"]] += 1
+    
+    users = list(user_counts.keys())
+    counts = list(user_counts.values())
+    
+    fig, ax = plt.subplots(figsize=(8, 4))
+    fig.patch.set_facecolor('#1a1a2e')
+    ax.set_facecolor('#1a1a2e')
+    
+    bars = ax.bar(users, counts, color='#4895ef', edgecolor='none', width=0.6)
+    
+    ax.set_title('Upcoming Tasks by User', color='#caf0f8', fontsize=14, fontweight='bold', pad=20)
+    ax.set_ylabel('Number of Tasks', color='#caf0f8', fontsize=11)
+    ax.tick_params(axis='x', colors='#caf0f8')
+    ax.tick_params(axis='y', colors='#8892b0')
+    ax.spines['top'].set_visible(False)
+    ax.spines['right'].set_visible(False)
+    ax.spines['bottom'].set_color('#2d2d44')
+    ax.spines['left'].set_color('#2d2d44')
+    
+    # Add value labels
+    for bar in bars:
+        height = bar.get_height()
+        ax.text(bar.get_x() + bar.get_width()/2., height + 0.1, f'{int(height)}', ha='center', va='bottom', color='#ffffff', fontweight='bold')
+    
+    return _create_base64_image(fig)
+
+
+def generate_task_completion_over_time_line_chart(tasks):
+    """
+    Generate a line chart for task completion over time (cumulative).
+    
+    Args:
+        tasks: List of task dictionaries
+        
+    Returns:
+        str: Base64 encoded PNG image string
+    """
+    from collections import defaultdict
+    completed_tasks = [task for task in tasks if task["completed_at"]]
+    completed_tasks.sort(key=lambda x: x["completed_at"])
+    
+    date_counts = defaultdict(int)
+    for task in completed_tasks:
+        date_counts[task["completed_at"]] += 1
+    
+    dates = sorted(date_counts.keys())
+    cumulative = []
+    total = 0
+    for date in dates:
+        total += date_counts[date]
+        cumulative.append(total)
+    
+    fig, ax = plt.subplots(figsize=(8, 4))
+    fig.patch.set_facecolor('#1a1a2e')
+    ax.set_facecolor('#1a1a2e')
+    
+    ax.plot(dates, cumulative, color='#00d4aa', linewidth=2.5, marker='o', markersize=6, markerfacecolor='#00d4aa', markeredgecolor='#ffffff', markeredgewidth=2)
+    
+    ax.set_title('Task Completion Over Time', color='#caf0f8', fontsize=14, fontweight='bold', pad=15)
+    ax.set_xlabel('Date', color='#caf0f8', fontsize=11)
+    ax.set_ylabel('Cumulative Completed Tasks', color='#caf0f8', fontsize=11)
+    ax.tick_params(axis='x', colors='#8892b0', rotation=45)
+    ax.tick_params(axis='y', colors='#8892b0')
+    ax.spines['top'].set_visible(False)
+    ax.spines['right'].set_visible(False)
+    ax.spines['bottom'].set_color('#2d2d44')
+    ax.spines['left'].set_color('#2d2d44')
+    
+    plt.tight_layout()
+    return _create_base64_image(fig)
+
+
 def generate_charts(tasks, efficiency_score, weekly_data):
     """
     Generate all charts for the productivity widget.
@@ -328,7 +508,11 @@ def generate_charts(tasks, efficiency_score, weekly_data):
     return {
         "difficulty_pie_base64": generate_difficulty_pie_chart(tasks),
         "efficiency_bar_base64": generate_efficiency_gauge_chart(efficiency_score),
-        "weekly_trend_base64": generate_weekly_trend_chart(weekly_data)
+        "weekly_trend_base64": generate_weekly_trend_chart(weekly_data),
+        "incomplete_by_section_bar_base64": generate_incomplete_tasks_by_section_bar_chart(tasks),
+        "completion_status_pie_base64": generate_completion_status_pie_chart(tasks),
+        "upcoming_by_user_bar_base64": generate_upcoming_tasks_by_user_bar_chart(tasks),
+        "completion_over_time_line_base64": generate_task_completion_over_time_line_chart(tasks)
     }
 
 
