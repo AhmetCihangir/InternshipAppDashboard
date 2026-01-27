@@ -5,6 +5,7 @@ import { signInWithEmailAndPassword, onAuthStateChanged } from "firebase/auth"
 import { auth, db } from "../firebase"
 import { where, query, collection, getDocs } from "firebase/firestore"
 
+
 const AuthContext = createContext()
 
 export const AuthProvider = ({ children }) => {
@@ -36,10 +37,11 @@ export const AuthProvider = ({ children }) => {
                     data.highSchool,
                     data.telephone,
                     data.github,
-                    data.linkedIn,
+                    data.linkedin,
                     data.clubs,
                     data.location,
-                    data.university
+                    data.university,
+                    data.musics
                 );
             } else {
                 console.log("No user found with the provided email.");
@@ -59,14 +61,13 @@ export const AuthProvider = ({ children }) => {
             } else {
                 setUser(null);
             }
-            setLoading(false);
         })
 
         return () => unsubscribe()
     }, [])
 
 
-    return <AuthContext.Provider value={{ user, loading, login }}>
+    return <AuthContext.Provider value={{ user, loading, login , setLoading}}>
         {children}
     </AuthContext.Provider>
 }

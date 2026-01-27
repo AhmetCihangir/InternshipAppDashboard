@@ -13,11 +13,12 @@ import MenuIcon from '@mui/icons-material/Menu';
 import { useStateContext } from "../utils/StateContext";
 import { BG_COLOR, CARD_COLOR, TEXT_COLOR, WidgetNames } from "../utils/constants";
 import { useAuth } from "../utils/AuthContext";
+import { getAllTodos, getAllUsers } from "../utils/objects";
 
 
 function Main() {
     const [isOpen, setIsOpen] = useState(false);
-    const { user, loading, login } = useAuth();
+    const { loading } = useAuth();
 
     const toggleOpen = () => {
         setIsOpen(!isOpen);
@@ -34,6 +35,35 @@ function Main() {
 }
 
 const LoginPage = () => {
+    const [email, setEmail] = useState("");
+    const [password, setPassword] = useState("");
+
+    const { login, user, loading, setLoading } = useAuth();
+    const { setInternList, setTodoList } = useStateContext();
+
+    const handleLogin = async () => {
+        try {
+            await login(email, password);
+
+            if (user) {
+                const interns = await getAllUsers();
+                
+                setInternList(interns);
+                
+                const allTodos = await getAllTodos(interns);
+                
+                setTodoList(allTodos);
+                
+                console.log("Fetched Todos: ", allTodos);
+                console.log("Fetched Interns: ", interns);
+                console.log("Login successful for user: ", user.getName());
+                setLoading(false);
+            }
+        } catch (error) {
+            console.error("Login failed: ", error);
+        }
+    }
+
     return (
         <Box sx={{
             display: 'flex',
@@ -52,9 +82,47 @@ const LoginPage = () => {
                     You must be logged in to access the dashboard.
                 </Typography>
 
-                <TextField label="Email" variant="outlined" fullWidth margin="normal" />
-                <TextField label="Password" type="password" variant="outlined" fullWidth margin="normal" />
-                <Button variant="contained" color="primary" fullWidth sx={{ mt: 2 }}>
+                <TextField label="Email" variant="outlined" fullWidth margin="normal" sx={{
+                    '& .MuiOutlinedInput-root': {
+                        color: TEXT_COLOR,
+                        '& fieldset': {
+                            borderColor: TEXT_COLOR,
+                        },
+                        '&:hover fieldset': {
+                            borderColor: TEXT_COLOR,
+                        },
+                        '&.Mui-focused fieldset': {
+                            borderColor: TEXT_COLOR,
+                        },
+                    },
+                    '& .MuiInputLabel-root': {
+                        color: TEXT_COLOR,
+                    },
+                    '& .MuiInputLabel-root.Mui-focused': {
+                        color: TEXT_COLOR,
+                    },
+                }} value={email} onChange={(e) => setEmail(e.target.value)} />
+                <TextField label="Password" type="password" variant="outlined" sx={{
+                    '& .MuiOutlinedInput-root': {
+                        color: TEXT_COLOR,
+                        '& fieldset': {
+                            borderColor: TEXT_COLOR,
+                        },
+                        '&:hover fieldset': {
+                            borderColor: TEXT_COLOR,
+                        },
+                        '&.Mui-focused fieldset': {
+                            borderColor: TEXT_COLOR,
+                        },
+                    },
+                    '& .MuiInputLabel-root': {
+                        color: TEXT_COLOR,
+                    },
+                    '& .MuiInputLabel-root.Mui-focused': {
+                        color: TEXT_COLOR,
+                    },
+                }} fullWidth margin="normal" value={password} onChange={(e) => setPassword(e.target.value)} />
+                <Button variant="contained" color="primary" fullWidth sx={{ mt: 2 }} onClick={handleLogin}>
                     Log In
                 </Button>
             </Card>

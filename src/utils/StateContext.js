@@ -12,6 +12,7 @@ export const StateProvider = ({ children }) => {
     }
 
 
+
     return <StateContext.Provider value={{pageIndex, setPageIndex, internList, setInternList, todoList, setTodoList, updateTodoList}}>
     {children}
     </StateContext.Provider>

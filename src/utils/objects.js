@@ -15,8 +15,9 @@ class User {
     #clubs;
     #location;
     #university;
+    #musics;
 
-    constructor(name = "", userID, emails = [], role, department, _3true1wrong = [], highSchool = "", telephone = "", github = "", linkedIn = "", clubs = [], location = "", university = "") {
+    constructor(name = "", userID, emails = [], role, department, _3true1wrong = [], highSchool = "", telephone = "", github = "", linkedIn = "", clubs = [], location = "", university = "", musics = []) {
         this.#name = name;
         this.#userID = userID;
         this.#emails = emails;
@@ -30,6 +31,11 @@ class User {
         this.#clubs = clubs;
         this.#location = location;
         this.#university = university;
+        this.#musics = musics;
+    }
+
+    getMusics() {
+        return this.#musics;
     }
 
     get3true1wrong() {
@@ -221,7 +227,8 @@ async function getAllUsers() {
                 data.linkedIn,
                 data.clubs,
                 data.location,
-                data.university
+                data.university,
+                data.musics
             );
             users.push(user);
         });
