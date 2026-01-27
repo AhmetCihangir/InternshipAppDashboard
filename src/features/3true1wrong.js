@@ -193,9 +193,10 @@ const Widget3true1wrong = () => {
                 3 True 1 Wrong
               </Typography>
               <Typography mt={1} sx={{ color: TEXT_COLOR }}>
-                 Gerçeklerle yalanlar iç içe.<br />
-                 Hangisi sahte, karar senin.<br />
-                 Doğru hamle = +10 puan 💥
+                Gerçeklerle yalanlar iç içe.<br />
+                Her ekip üyesi hakkında <b>3 doğru</b> ve <b>1 yanlış</b> bilgi göreceksin.<br />
+                Görevin: <b>yanlış olanı bulmak</b> 
+                Doğru hamle = <b>+10 puan</b> 💥
               </Typography>
 
               <Stack direction="row" spacing={2} mt={3}>
@@ -327,4 +328,3 @@ const Widget3true1wrong = () => {
 };
 
 export default Widget3true1wrong;
-
