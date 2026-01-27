@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Widget } from "../utils/components";
 import { Box, Typography, CircularProgress, Alert } from "@mui/material";
 
-const API_URL = "http://localhost:5001/api/productivity-stats";
+const API_URL = process.env.REACT_APP_API_URL || "http://localhost:5001/api/productivity-stats";
 
 const WidgetPieChart = () => {
     const [data, setData] = useState(null);
