@@ -2,11 +2,20 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import './index.css';
 import Main from './core/main';
+import { CookiesProvider } from './utils/CookiesContext';
+import { StateProvider } from './utils/StateContext';
+import { AuthProvider } from './utils/AuthContext';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <React.StrictMode>
-    <Main></Main>
+    <CookiesProvider>
+      <StateProvider>
+        <AuthProvider>
+          <Main />
+        </AuthProvider>
+      </StateProvider>
+    </CookiesProvider>
   </React.StrictMode>
 );
 
