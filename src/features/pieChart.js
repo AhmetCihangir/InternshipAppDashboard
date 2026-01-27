@@ -69,73 +69,65 @@ const WidgetPieChart = () => {
 
                 {data && !loading && (
                     <>
-                        {/* Stats Summary */}
-                        <Box sx={{
-                            display: 'flex',
-                            justifyContent: 'center',
-                            gap: 4,
-                            mb: 2,
-                            flexWrap: 'wrap'
-                        }}>
-                            <StatCard
-                                label="Efficiency Score"
-                                value={`${data.efficiency_score}%`}
-                                color="#00d4aa"
-                            />
-                            <StatCard
-                                label="Completed"
-                                value={`${data.completed_tasks}/${data.total_tasks}`}
-                                color="#4895ef"
-                            />
-                        </Box>
+                        {/* Section 1: Team Members - Individual Efficiency */}
+                        <Typography variant="h5" sx={{ color: '#caf0f8', mb: 2, fontWeight: 'bold' }}>
+                            👥 Team Members - Efficiency Scores
+                        </Typography>
+                        {data.charts.person_charts && (
+                            <Box sx={{
+                                display: 'flex',
+                                flexWrap: 'wrap',
+                                justifyContent: 'center',
+                                gap: 2,
+                                width: '100%',
+                                mb: 4
+                            }}>
+                                {Object.entries(data.charts.person_charts).map(([name, chartBase64]) => (
+                                    <ChartImage
+                                        key={name}
+                                        base64={chartBase64}
+                                        alt={`${name}'s Efficiency`}
+                                    />
+                                ))}
+                            </Box>
+                        )}
 
-                        {/* Row 1: Efficiency Gauge + Difficulty Pie */}
+                        {/* Section 2: Task Difficulty Distribution + Upcoming Tasks by User */}
+                        <Typography variant="h5" sx={{ color: '#caf0f8', mb: 2, fontWeight: 'bold' }}>
+                            📊 Task Overview
+                        </Typography>
                         <ChartRow>
-                            <ChartImage
-                                base64={data.charts.efficiency_bar_base64}
-                                alt="Efficiency Score Gauge"
-                            />
                             <ChartImage
                                 base64={data.charts.difficulty_pie_base64}
                                 alt="Task Difficulty Distribution"
                             />
-                        </ChartRow>
-
-                        {/* Row 2: Completion Status Pie + Incomplete by Section */}
-                        <ChartRow>
-                            <ChartImage
-                                base64={data.charts.completion_status_pie_base64}
-                                alt="Completion Status"
-                            />
-                            <ChartImage
-                                base64={data.charts.incomplete_by_section_bar_base64}
-                                alt="Incomplete Tasks by Section"
-                            />
-                        </ChartRow>
-
-                        {/* Row 3: Upcoming by User */}
-                        <ChartRow>
                             <ChartImage
                                 base64={data.charts.upcoming_by_user_bar_base64}
                                 alt="Upcoming Tasks by User"
                             />
                         </ChartRow>
 
-                        {/* Row 4: Weekly Trend */}
-                        <ChartRow>
-                            <ChartImage
-                                base64={data.charts.weekly_trend_base64}
-                                alt="Weekly Efficiency Trend"
-                            />
-                        </ChartRow>
-
-                        {/* Row 5: Completion Over Time */}
-                        <ChartRow>
-                            <ChartImage
-                                base64={data.charts.completion_over_time_line_base64}
-                                alt="Task Completion Over Time"
-                            />
-                        </ChartRow>
+                        {/* Section 3: Per-Person Weekly Trends */}
+                        <Typography variant="h5" sx={{ color: '#caf0f8', mt: 4, mb: 2, fontWeight: 'bold' }}>
+                            � Weekly Efficiency Trends by Member
+                        </Typography>
+                        {data.charts.person_weekly_trends && (
+                            <Box sx={{
+                                display: 'flex',
+                                flexWrap: 'wrap',
+                                justifyContent: 'center',
+                                gap: 2,
+                                width: '100%'
+                            }}>
+                                {Object.entries(data.charts.person_weekly_trends).map(([name, chartBase64]) => (
+                                    <ChartImage
+                                        key={name}
+                                        base64={chartBase64}
+                                        alt={`${name}'s Weekly Trend`}
+                                    />
+                                ))}
+                            </Box>
+                        )}
                     </>
                 )}
             </Box>

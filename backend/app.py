@@ -493,6 +493,207 @@ def generate_task_completion_over_time_line_chart(tasks):
     return _create_base64_image(fig)
 
 
+def generate_person_efficiency_chart(tasks, person_name):
+    """
+    Generate an efficiency gauge chart for a specific person.
+    
+    Args:
+        tasks: List of task dictionaries
+        person_name: Name of the person to generate chart for
+        
+    Returns:
+        str: Base64 encoded PNG image string
+    """
+    # Filter tasks for this person
+    person_tasks = [task for task in tasks if task["assignee"] == person_name]
+    
+    if not person_tasks:
+        return None
+    
+    # Calculate efficiency for this person
+    total_difficulty = sum(task["difficulty"] for task in person_tasks)
+    completed_difficulty = sum(task["difficulty"] for task in person_tasks if task["is_completed"])
+    
+    if total_difficulty == 0:
+        efficiency_score = 0.0
+    else:
+        efficiency_score = round((completed_difficulty / total_difficulty) * 100, 1)
+    
+    total_tasks = len(person_tasks)
+    completed_tasks = sum(1 for task in person_tasks if task["is_completed"])
+    
+    # Create the chart
+    fig, ax = plt.subplots(figsize=(5, 3.5))
+    fig.patch.set_facecolor('#1a1a2e')
+    ax.set_facecolor('#1a1a2e')
+    
+    # Create horizontal bar gauge
+    bar_width = 0.4
+    
+    # Background bar (represents 100%)
+    ax.barh(0, 100, height=bar_width, color='#2d2d44', edgecolor='none')
+    
+    # Efficiency bar with color based on score
+    if efficiency_score >= 75:
+        bar_color = '#00d4aa'  # Green
+    elif efficiency_score >= 50:
+        bar_color = '#ffd60a'  # Yellow
+    elif efficiency_score >= 25:
+        bar_color = '#ff9500'  # Orange
+    else:
+        bar_color = '#ff3b30'  # Red
+    
+    ax.barh(0, efficiency_score, height=bar_width, color=bar_color, edgecolor='none')
+    
+    # Add efficiency percentage text
+    ax.text(50, 0, f'{efficiency_score}%', 
+            ha='center', va='center', 
+            fontsize=20, fontweight='bold', 
+            color='#ffffff')
+    
+    # Add task count below
+    ax.text(50, -0.55, f'{completed_tasks}/{total_tasks} tasks completed', 
+            ha='center', va='center', 
+            fontsize=10, 
+            color='#8892b0')
+    
+    # Style the axes
+    ax.set_xlim(0, 100)
+    ax.set_ylim(-0.9, 0.6)
+    ax.axis('off')
+    
+    ax.set_title(f'{person_name}', color='#caf0f8', fontsize=14, fontweight='bold', pad=10)
+    
+    return _create_base64_image(fig)
+
+
+def generate_all_person_charts(tasks):
+    """
+    Generate efficiency charts for all team members.
+    
+    Args:
+        tasks: List of task dictionaries
+        
+    Returns:
+        dict: Contains base64 strings for each person's chart
+    """
+    # Get unique assignees
+    assignees = list(set(task["assignee"] for task in tasks))
+    assignees.sort()  # Sort alphabetically
+    
+    person_charts = {}
+    for person in assignees:
+        chart = generate_person_efficiency_chart(tasks, person)
+        if chart:
+            person_charts[person] = chart
+    
+    return person_charts
+
+
+def generate_person_weekly_trend_chart(person_name):
+    """
+    Generate a weekly efficiency trend chart for a specific person.
+    
+    Args:
+        person_name: Name of the person
+        
+    Returns:
+        str: Base64 encoded PNG image string
+    """
+    import random
+    
+    # Generate mock weekly data for this person
+    # In real app, this would be calculated from historical task data
+    days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
+    day_abbrev = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
+    
+    # Generate different patterns for each person
+    base_efficiency = {
+        "Alice": 85,
+        "Bob": 65,
+        "Charlie": 55,
+        "Diana": 50
+    }.get(person_name, 60)
+    
+    # Create weekly data with some variation
+    weekly_scores = []
+    for i in range(5):  # Mon-Fri
+        variation = random.uniform(-15, 15)
+        score = min(100, max(0, base_efficiency + variation))
+        weekly_scores.append(round(score, 1))
+    
+    # Weekend is None (future/no work)
+    completed_days = list(range(5))
+    future_days = [5, 6]
+    
+    fig, ax = plt.subplots(figsize=(6, 3))
+    fig.patch.set_facecolor('#1a1a2e')
+    ax.set_facecolor('#1a1a2e')
+    
+    # Plot the efficiency line
+    ax.plot(completed_days, weekly_scores, 
+            color='#00d4aa', linewidth=2, marker='o', 
+            markersize=6, markerfacecolor='#00d4aa', markeredgecolor='#ffffff',
+            markeredgewidth=1.5, zorder=5)
+    
+    # Fill area under the curve
+    ax.fill_between(completed_days, weekly_scores, alpha=0.2, color='#00d4aa')
+    
+    # Add value labels on points
+    for x, y in zip(completed_days, weekly_scores):
+        ax.annotate(f'{y}%', (x, y), textcoords="offset points", 
+                    xytext=(0, 10), ha='center', fontsize=8, 
+                    color='#ffffff', fontweight='bold')
+    
+    # Style the axes
+    ax.set_xlim(-0.5, 6.5)
+    ax.set_ylim(0, 110)
+    ax.set_xticks(range(7))
+    ax.set_xticklabels(day_abbrev, color='#caf0f8', fontsize=8)
+    
+    # Add horizontal reference lines
+    for y in [50, 100]:
+        ax.axhline(y=y, color='#2d2d44', linestyle='--', linewidth=0.5, alpha=0.5)
+    
+    # Gray out future days
+    for idx in future_days:
+        ax.axvspan(idx - 0.4, idx + 0.4, alpha=0.15, color='#8892b0')
+    
+    # Style axes
+    ax.tick_params(axis='y', colors='#8892b0', labelsize=8)
+    ax.spines['top'].set_visible(False)
+    ax.spines['right'].set_visible(False)
+    ax.spines['bottom'].set_color('#2d2d44')
+    ax.spines['left'].set_color('#2d2d44')
+    
+    ax.set_title(f'{person_name} - Weekly Trend', color='#caf0f8', fontsize=11, fontweight='bold', pad=8)
+    
+    plt.tight_layout()
+    return _create_base64_image(fig)
+
+
+def generate_all_person_weekly_trends(tasks):
+    """
+    Generate weekly trend charts for all team members.
+    
+    Args:
+        tasks: List of task dictionaries
+        
+    Returns:
+        dict: Contains base64 strings for each person's weekly trend chart
+    """
+    assignees = list(set(task["assignee"] for task in tasks))
+    assignees.sort()
+    
+    person_trends = {}
+    for person in assignees:
+        chart = generate_person_weekly_trend_chart(person)
+        if chart:
+            person_trends[person] = chart
+    
+    return person_trends
+
+
 def generate_charts(tasks, efficiency_score, weekly_data):
     """
     Generate all charts for the productivity widget.
@@ -507,12 +708,9 @@ def generate_charts(tasks, efficiency_score, weekly_data):
     """
     return {
         "difficulty_pie_base64": generate_difficulty_pie_chart(tasks),
-        "efficiency_bar_base64": generate_efficiency_gauge_chart(efficiency_score),
-        "weekly_trend_base64": generate_weekly_trend_chart(weekly_data),
-        "incomplete_by_section_bar_base64": generate_incomplete_tasks_by_section_bar_chart(tasks),
-        "completion_status_pie_base64": generate_completion_status_pie_chart(tasks),
         "upcoming_by_user_bar_base64": generate_upcoming_tasks_by_user_bar_chart(tasks),
-        "completion_over_time_line_base64": generate_task_completion_over_time_line_chart(tasks)
+        "person_charts": generate_all_person_charts(tasks),
+        "person_weekly_trends": generate_all_person_weekly_trends(tasks)
     }
 
 
