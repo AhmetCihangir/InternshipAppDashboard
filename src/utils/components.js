@@ -69,7 +69,7 @@ export function Widget({ children, title = "", height = "25vh", width = "100%", 
             >
                 <Box p={4} sx={{
                     backgroundColor: BG_COLOR,
-                    minHeight : '100vh',
+                    minHeight : '150vh',
                 }}>
                     <IconButton edge="start" sx={{
                         color: TEXT_COLOR

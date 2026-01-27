@@ -11,13 +11,14 @@ class User {
     #highSchool;
     #telephone;
     #github;
-    #linkedIn;
+    #linkedin;
     #clubs;
     #location;
     #university;
     #musics;
+    #score = 0;
 
-    constructor(name = "", userID, emails = [], role, department, _3true1wrong = [], highSchool = "", telephone = "", github = "", linkedIn = "", clubs = [], location = "", university = "", musics = []) {
+    constructor(name = "", userID, emails = [], role, department, _3true1wrong = [], highSchool = "", telephone = "", github = "", linkedIn = "", clubs = [], location = "", university = "", musics = [], score) {
         this.#name = name;
         this.#userID = userID;
         this.#emails = emails;
@@ -27,11 +28,20 @@ class User {
         this.#highSchool = highSchool;
         this.#telephone = telephone;
         this.#github = github;
-        this.#linkedIn = linkedIn;
+        this.#linkedin = linkedIn;
         this.#clubs = clubs;
         this.#location = location;
         this.#university = university;
         this.#musics = musics;
+        this.#score = score;
+    }
+
+    getScore() {
+        return this.#score;
+    }
+
+    setScore(newScore) {
+        this.#score = newScore;
     }
 
     getMusics() {
@@ -79,7 +89,7 @@ class User {
     }
 
     getLinkedIn() {
-        return this.#linkedIn;
+        return this.#linkedin;
     }
 
     getClubs() {
@@ -224,11 +234,12 @@ async function getAllUsers() {
                 data.highSchool,
                 data.telephone,
                 data.github,
-                data.linkedIn,
+                data.linkedin,
                 data.clubs,
                 data.location,
                 data.university,
-                data.musics
+                data.musics,
+                data.score
             );
             users.push(user);
         });
