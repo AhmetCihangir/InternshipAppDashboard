@@ -1,5 +1,5 @@
 import { db } from "../firebase";
-import { collection, setDoc } from "firebase/firestore";
+import { collection, setDoc, getDocs } from "firebase/firestore";
 
 class User {
     #name;
@@ -100,16 +100,20 @@ class ToDo {
     #value; // 1-10 
     #taskID;
 
-    constructor(title, description, dueDate, priority, responsibleUsers, departments, status = 'Pending', value = 0) {
+    constructor(title, description, dueDate, priority, responsibleUsers, departments, status = 'Pending', value = 0, allUsers = []) {
         this.#title = title;
         this.#description = description;
         this.#dueDate = dueDate;
         this.#priority = priority;
-        this.#responsibleUsers = responsibleUsers;
+        this.convertUserIDstoUsers(responsibleUsers, allUsers);
         this.#departments = departments;
         this.#status = status;
         this.#value = value;
         this.#taskID = Date.now().toString(); // Simple unique ID based on timestamp
+    }
+
+    convertUserIDstoUsers(userIDs, allUsers ) {
+        this.#responsibleUsers = allUsers.filter(user => userIDs.includes(user.getUserID()));
     }
 
     getTitle() {
@@ -153,11 +157,79 @@ class ToDo {
     }
 
     async uploadToFirebase() {
-        
-    
+        try {
+            await setDoc(collection(db, "todos"), {
+                taskID: this.#taskID,
+                title: this.#title,
+                description: this.#description,
+                dueDate: this.#dueDate,
+                priority: this.#priority,
+                responsibleUsers: this.#responsibleUsers.map(user => user.getUserID()),
+                departments: this.#departments,
+                status: this.#status,
+                value: this.#value,
+            });
+            console.log("ToDo uploaded successfully!");
+        } catch (error) {
+            console.error("Error uploading ToDo: ", error);
+        }
     }
-
-
 }
 
-export { User, ToDo };
+async function getAllTodos(allUsers = []) {
+    try{
+        const querySnapshot = await getDocs(collection(db, "todos"));
+        const todos = [];
+        querySnapshot.forEach((doc) => {
+            const data = doc.data();
+            const todo = new ToDo(
+                data.title,
+                data.description,
+                data.dueDate,
+                data.priority,
+                data.responsibleUsers,
+                data.departments,
+                data.status,
+                data.value,
+                allUsers
+            );
+            todos.push(todo);
+        });
+        return todos;
+    } catch (error) {
+        console.error("Error fetching ToDos: ", error);
+        return [];
+    }
+}
+
+async function getAllUsers() {
+    try{
+        const querySnapshot = await getDocs(collection(db, "users"));
+        const users = [];
+        querySnapshot.forEach((doc) => {
+            const data = doc.data();
+            const user = new User(
+                data.name,
+                data.userID,
+                data.emails,
+                data.role,
+                data.department,
+                data._3true1wrong,
+                data.highSchool,
+                data.telephone,
+                data.github,
+                data.linkedIn,
+                data.clubs,
+                data.location,
+                data.university
+            );
+            users.push(user);
+        });
+        return users;
+    } catch (error) {
+        console.error("Error fetching Users: ", error);
+        return [];
+    }
+}
+
+export { User, ToDo, getAllTodos, getAllUsers };
