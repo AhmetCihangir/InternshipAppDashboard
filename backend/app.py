@@ -386,8 +386,8 @@ def health_check():
 
 # MAIN
 if __name__ == '__main__':
-    print("🚀 Starting Productivity Widget API...")
-    print("📊 Endpoints:")
+    print("Starting Productivity Widget API...")
+    print("Endpoints:")
     print("   - GET /api/productivity-stats")
     print("   - GET /api/health")
     print("")
