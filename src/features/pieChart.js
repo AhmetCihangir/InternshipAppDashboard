@@ -71,7 +71,7 @@ const WidgetPieChart = () => {
                     <>
                         {/* Section 1: Team Members - Individual Efficiency */}
                         <Typography variant="h5" sx={{ color: '#caf0f8', mb: 2, fontWeight: 'bold' }}>
-                            👥 Team Members - Efficiency Scores
+                            Team Members - Efficiency Scores
                         </Typography>
                         {data.charts.person_charts && (
                             <Box sx={{
@@ -94,7 +94,7 @@ const WidgetPieChart = () => {
 
                         {/* Section 2: Task Difficulty Distribution + Upcoming Tasks by User */}
                         <Typography variant="h5" sx={{ color: '#caf0f8', mb: 2, fontWeight: 'bold' }}>
-                            📊 Task Overview
+                            Task Overview
                         </Typography>
                         <ChartRow>
                             <ChartImage
@@ -109,7 +109,7 @@ const WidgetPieChart = () => {
 
                         {/* Section 3: Per-Person Weekly Trends */}
                         <Typography variant="h5" sx={{ color: '#caf0f8', mt: 4, mb: 2, fontWeight: 'bold' }}>
-                            � Weekly Efficiency Trends by Member
+                            Weekly Efficiency Trends by Member
                         </Typography>
                         {data.charts.person_weekly_trends && (
                             <Box sx={{
