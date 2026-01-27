@@ -722,12 +722,7 @@ def generate_charts(tasks, efficiency_score, weekly_data):
 def get_productivity_stats():
     """
     API endpoint that returns productivity statistics and charts.
-    
-    Returns JSON with:
-    - efficiency_score: Weighted efficiency percentage
-    - total_tasks: Total number of tasks
-    - completed_tasks: Number of completed tasks
-    - charts: Base64 encoded chart images
+    Uses mock data - for real data use POST endpoint.
     """
     try:
         # Get mock data
@@ -760,6 +755,118 @@ def get_productivity_stats():
         }), 500
 
 
+@app.route('/api/productivity-stats', methods=['POST'])
+def get_productivity_stats_from_data():
+    """
+    API endpoint that accepts real Firestore data and returns charts.
+    
+    Expected JSON body:
+    {
+        "users": [{"name": "...", "userID": "...", ...}],
+        "todos": [{"title": "...", "status": "...", "priority": ..., "responsibleUsers": [...], ...}]
+    }
+    """
+    try:
+        data = request.get_json()
+        
+        if not data:
+            return jsonify({"status": "error", "message": "No data provided"}), 400
+        
+        users = data.get("users", [])
+        todos = data.get("todos", [])
+        
+        # Convert Firestore data to our task format
+        tasks = convert_firestore_to_tasks(todos, users)
+        
+        # Calculate statistics
+        efficiency_score = calculate_weighted_efficiency(tasks)
+        total_tasks = len(tasks)
+        completed_tasks = sum(1 for task in tasks if task["is_completed"])
+        
+        # Generate mock weekly data (could be enhanced later)
+        weekly_data = get_mock_weekly_efficiency()
+        
+        # Generate charts with real data
+        charts = generate_charts(tasks, efficiency_score, weekly_data)
+        
+        return jsonify({
+            "status": "success",
+            "data": {
+                "efficiency_score": efficiency_score,
+                "total_tasks": total_tasks,
+                "completed_tasks": completed_tasks,
+                "weekly_efficiency": weekly_data,
+                "charts": charts,
+                "user_count": len(users)
+            }
+        })
+        
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        return jsonify({
+            "status": "error",
+            "message": str(e)
+        }), 500
+
+
+def convert_firestore_to_tasks(todos, users):
+    """
+    Convert Firestore todo data to our internal task format.
+    
+    Maps:
+    - priority (Fibonacci: 1,2,3,5,8) -> difficulty (1-5)
+    - status -> is_completed
+    - responsibleUsers -> assignee names
+    """
+    # Create user ID to name mapping
+    user_map = {}
+    for user in users:
+        user_id = user.get("userID", user.get("id", ""))
+        user_name = user.get("name", "Unknown")
+        user_map[user_id] = user_name
+    
+    tasks = []
+    for i, todo in enumerate(todos):
+        # Map priority to difficulty (Fibonacci to 1-5 scale)
+        priority = todo.get("priority", 3)
+        if isinstance(priority, str):
+            priority_map = {"low": 1, "medium": 3, "high": 5}
+            priority = priority_map.get(priority.lower(), 3)
+        
+        # Fibonacci to 1-5 mapping
+        fib_to_diff = {1: 1, 2: 2, 3: 3, 5: 4, 8: 5, 13: 5}
+        difficulty = fib_to_diff.get(priority, min(5, max(1, priority)))
+        
+        # Map status to is_completed
+        status = todo.get("status", "Pending").lower()
+        is_completed = status in ["completed", "done", "complete"]
+        
+        # Get assignee name(s)
+        responsible_users = todo.get("responsibleUsers", [])
+        if responsible_users and len(responsible_users) > 0:
+            # Get first responsible user's name
+            first_user_id = responsible_users[0]
+            assignee = user_map.get(first_user_id, str(first_user_id))
+        else:
+            assignee = "Unassigned"
+        
+        # Create task in our format
+        task = {
+            "id": i + 1,
+            "title": todo.get("title", "Untitled Task"),
+            "difficulty": difficulty,
+            "is_completed": is_completed,
+            "status": status,
+            "assignee": assignee,
+            "created_at": todo.get("createdAt", "2024-01-01"),
+            "completed_at": todo.get("completedAt") if is_completed else None
+        }
+        tasks.append(task)
+    
+    return tasks
+
+
 @app.route('/api/health', methods=['GET'])
 def health_check():
     """Health check endpoint."""
@@ -770,7 +877,8 @@ def health_check():
 if __name__ == '__main__':
     print("Starting Productivity Widget API...")
     print("Endpoints:")
-    print("   - GET /api/productivity-stats")
-    print("   - GET /api/health")
+    print("   - GET  /api/productivity-stats (mock data)")
+    print("   - POST /api/productivity-stats (real Firestore data)")
+    print("   - GET  /api/health")
     print("")
     app.run(debug=True, host='0.0.0.0', port=5001)
