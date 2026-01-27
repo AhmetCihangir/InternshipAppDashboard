@@ -17,6 +17,7 @@ class ToDo:
         responsible_users=None, 
         task_id=None,
         status="Pending",
+        created_at=None,
     ):
         #define attributes
         self.taskID = task_id or str(uuid.uuid4())
