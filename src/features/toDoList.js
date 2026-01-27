@@ -1,11 +1,10 @@
 import { useEffect, useMemo, useState } from "react";
 import { Widget } from "../utils/components";
-import { getAllTodos } from "../utils/objects"
-p
+
 const BASE_URL = "http://localhost:5000";
 const API = `${BASE_URL}/todos`;
 
-// Replace later with real logged-in user id
+// Replace later with your real logged-in user id
 const REQUEST_USER_ID = "demo-user-1";
 
 async function apiFetch(url, options = {}) {
@@ -77,8 +76,8 @@ const WidgetToDoList = () => {
         setErr("");
         setLoading(true);
         try {
-            const todos = await getAllTodos([]); // pass users if you have them
-            setTasks(Array.isArray(todos) ? todos : []);
+            const data = await apiFetch(API, { method: "GET" });
+            setTasks(Array.isArray(data) ? data : data?.tasks ?? []);
         } catch (e) {
             setErr(e.message || "Failed to load tasks");
         } finally {
