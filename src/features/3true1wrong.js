@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import {
   Box,
   Button,
@@ -8,147 +8,95 @@ import {
   LinearProgress,
   Stack,
   Typography,
-  Chip,
 } from "@mui/material";
+import { collection, getDocs } from "firebase/firestore";
 import { Widget } from "../utils/components";
 import { TEXT_COLOR } from "../utils/constants";
-
-
-const PLAYERS = [
-  {
-    id: "u1",
-    name: "Can",
-    facts: [
-      { text: "Skyrim'de 1350+ saatim var", isTrue: true },
-      { text: "Geçen yaz bir yatırım bankasında staj yaparken yanlışlıkla bütün veritabanını sildim ", isTrue: false }, // veritabanı silme olayı yanlış
-      { text: "Hür irademle hiç smart_pointer kullanmadım", isTrue: true },
-      { text: "Veri bazlı çözüm süreçlerine ilgim var", isTrue: true },
-    ],
-  },
-  {
-    id: "u2",
-    name: "Ceylin",
-    facts: [
-      { text: "Tek çocuğum", isTrue: true },
-      { text: "9 yıl bale yaptım", isTrue: true },
-      { text: "2 kere kolumu kırdım", isTrue: false },
-      { text: "Bisiklete binmeyi bilmiyorum", isTrue: true },
-    ],
-  },
-  {
-    id: "u3",
-    name: "Eray",
-    facts: [
-      { text: "Günlük Asya yemekleriyle besleniyorum", isTrue: true },
-      { text: "Osman adında ekşi mayam var", isTrue: true },
-      { text: "Ejderha sesi çıkarabiliyorum", isTrue: true },
-      { text: "Tek bacağımla koşabiliyorum", isTrue: false },
-    ],
-  },
-  {
-    id: "u4",
-    name: "Ece",
-    facts: [
-      { text: "Vegan ve sağlıklı besleniyorum", isTrue: true },
-      { text: "Diziye başladım mı sezon finalini görmeden kalkmam", isTrue: true },
-      { text: "Kedi değil, köpek insanıyım", isTrue: true },
-      { text: "Sabah insanıyım, güneş doğmadan spora giderim", isTrue: false },
-    ],
-  },
-  {
-    id: "u5",
-    name: "Tutku",
-    facts: [
-      { text: "Geceleri daha verimli çalışırım", isTrue: false },
-      { text: "Kahveyi şekersiz içerim", isTrue: true },
-      { text: "Bir şarkıyı yüzlerce kez dinleyebilirim", isTrue: true },
-      { text: "Köpekleri kedilerden daha çok severim", isTrue: true },
-    ],
-  },
-  {
-    id: "u6",
-    name: "Cihangir",
-    facts: [
-      { text: "Korece biliyorum", isTrue: true },
-      { text: "İki kuşum ve bir kedim var", isTrue: true },
-      { text: "Bilgisayar okuyorum", isTrue: true },
-      { text: "19 yaşındayım", isTrue: false },
-    ],
-  },
-  {
-    id: "u7",
-    name: "Burak",
-    facts: [
-      { text: "Gitar çalıyorum", isTrue: true },
-      { text: "Microsoft hesabım çalındı", isTrue: true },
-      { text: "Elektronik mühendisliği okuyacağım", isTrue: true },
-      { text: "Brawlhallada rankim Diamond", isTrue: false },
-    ],
-  },
-  {
-    id: "u8",
-    name: "Vedat",
-    facts: [
-      { text: "En sevdiğim renk mavi", isTrue: true },
-      { text: "Bir tane abim var", isTrue: true },
-      { text: "Futbol oynamayı severim", isTrue: true },
-      { text: "Müzik dinlemem", isTrue: false },
-    ],
-  },
-  {
-    id: "u9",
-    name: "Zeynep",
-    facts: [
-      { text: "Hiç kemiğim kırılmadı", isTrue: true },
-      { text: "3 kardeşin en küçüğüyüm", isTrue: true },
-      { text: "Zeytinden nefret ederim", isTrue: true },
-      { text: "Hayatım boyunca aynı evde yaşadım", isTrue: false },
-    ],
-  },
-  {
-    id: "u10",
-    name: "Fatmanur",
-    facts: [
-      { text: "Bir dönem vejetaryendim", isTrue: true },
-      { text: "Odamda VR gözlük var", isTrue: true },
-      { text: "Dün bilgisayarımı Kadıköy'de unuttum", isTrue: true },
-      { text: "Hiç renkli kıyafetim yok", isTrue: false },
-    ],
-  },
-];
-
+import { db } from "../firebase"; // ✅ src/firebase.js
 
 const shuffle = (arr) => [...arr].sort(() => Math.random() - 0.5);
+
+// Firestore: _3true1wrong array, isTrue string, text string
+const normalizeFacts = (arr) => {
+  if (!Array.isArray(arr)) return [];
+  return arr
+    .filter((x) => x && typeof x.text === "string")
+    .map((x) => ({
+      text: x.text,
+      isTrue: String(x.isTrue).toLowerCase() === "true", // ✅ "true"/"false" -> boolean
+    }));
+};
 
 const Widget3true1wrong = () => {
   const [started, setStarted] = useState(false);
   const [personIndex, setPersonIndex] = useState(0);
   const [score, setScore] = useState(0);
 
-
   const [pickedText, setPickedText] = useState(null);
-
-  const [results, setResults] = useState([]); 
-
-  
+  const [results, setResults] = useState([]);
   const [showFinal, setShowFinal] = useState(false);
 
-  const person = PLAYERS[personIndex];
-  const totalPeople = PLAYERS.length;
+  // ✅ Firestore'dan gelecek oyuncular
+  const [players, setPlayers] = useState([]);
+  const [loadingPlayers, setLoadingPlayers] = useState(true);
+  const [playersError, setPlayersError] = useState("");
+  const [debugInfo, setDebugInfo] = useState(""); // ✅ localhost test için
+
+  useEffect(() => {
+    const fetchPlayers = async () => {
+      try {
+        setLoadingPlayers(true);
+        setPlayersError("");
+        setDebugInfo("");
+
+        const snap = await getDocs(collection(db, "users"));
+
+        const list = snap.docs.map((doc) => {
+          const data = doc.data() || {};
+          return {
+            id: doc.id,
+            name: data.name || data.fullName || "İsimsiz",
+            facts: normalizeFacts(data._3true1wrong),
+          };
+        });
+
+        // sadece 4 fact olanları al (oyun 3 true 1 wrong olduğu için)
+        const filtered = list.filter((p) => p.facts.length === 4);
+
+        // isim sıralı olsun
+        filtered.sort((a, b) => (a.name || "").localeCompare(b.name || ""));
+
+        setPlayers(filtered);
+        
+      } catch (e) {
+        console.error("Firestore fetch error:", e);
+        setPlayersError("Firebase verisi alınamadı (Firestore / users).");
+        setDebugInfo(`❌ Firebase Hata: ${e?.code || e?.message || "unknown"}`);
+      } finally {
+        setLoadingPlayers(false);
+      }
+    };
+
+    fetchPlayers();
+  }, []);
+
+  const person = players[personIndex];
+  const totalPeople = players.length;
 
   const options = useMemo(() => {
     if (!person) return [];
     return shuffle(person.facts);
-  }, [personIndex, person]);
+  }, [person]); // ✅ personIndex gereksizdi
 
+  // ✅ son kişide %100 olsun diye (personIndex+1)/totalPeople
   const progress =
-    totalPeople === 0 ? 0 : Math.round((personIndex / totalPeople) * 100);
+    totalPeople === 0 ? 0 : Math.round(((personIndex + 1) / totalPeople) * 100);
 
   const handlePick = (opt) => {
-    if (pickedText) return; 
+    if (pickedText) return;
     setPickedText(opt.text);
 
-    const isCorrect = opt.isTrue === false; 
+    const isCorrect = opt.isTrue === false; // yanlış olanı seçmek = doğru hamle
     if (isCorrect) setScore((s) => s + 10);
 
     setResults((prev) => [
@@ -164,7 +112,6 @@ const Widget3true1wrong = () => {
   const handleNext = () => {
     setPickedText(null);
 
- 
     if (personIndex + 1 < totalPeople) {
       setPersonIndex((i) => i + 1);
     } else {
@@ -183,26 +130,60 @@ const Widget3true1wrong = () => {
     setShowFinal(false);
   };
 
+  // Başlat butonu sadece data geldiyse aktif olsun
+  const canStart = !loadingPlayers && !playersError && totalPeople > 0;
+
   return (
     <Widget title="3 True 1 Wrong Quiz" index={0}>
       <Box>
-        {!started ? (
+        {/* ✅ Localhost Firebase bağlantı durumunu net gör */}
+        <Typography sx={{ color: TEXT_COLOR, opacity: 0.85, mb: 2 }}>
+          {loadingPlayers ? "⏳ Firebase kontrol ediliyor..." : debugInfo}
+        </Typography>
+
+        {loadingPlayers ? (
+          <Card sx={{ background: "transparent", border: `1px solid ${TEXT_COLOR}` }}>
+            <CardContent>
+              <Typography sx={{ color: TEXT_COLOR }}>Veriler yükleniyor...</Typography>
+            </CardContent>
+          </Card>
+        ) : playersError ? (
+          <Card sx={{ background: "transparent", border: `1px solid ${TEXT_COLOR}` }}>
+            <CardContent>
+              <Typography sx={{ color: TEXT_COLOR }}>{playersError}</Typography>
+              <Typography sx={{ color: TEXT_COLOR, opacity: 0.85, mt: 1 }}>
+                Firestore’da <b>users</b> collection ve her user doc’unda{" "}
+                <b>name</b> + <b>_3true1wrong</b> (4 eleman) olmalı.
+              </Typography>
+              <Typography sx={{ color: TEXT_COLOR, opacity: 0.85, mt: 1 }}>
+                Debug: {debugInfo}
+              </Typography>
+            </CardContent>
+          </Card>
+        ) : !started ? (
           <Card sx={{ background: "transparent", border: `1px solid ${TEXT_COLOR}` }}>
             <CardContent>
               <Typography variant="h4" sx={{ color: TEXT_COLOR }}>
                 3 True 1 Wrong
               </Typography>
               <Typography mt={1} sx={{ color: TEXT_COLOR }}>
-                 Gerçeklerle yalanlar iç içe.<br />
-                 Hangisi sahte, karar senin.<br />
-                 Doğru hamle = +10 puan 💥
+                Gerçeklerle yalanlar iç içe.<br />
+                Her ekip üyesi hakkında <b>3 doğru</b> ve <b>1 yanlış</b> bilgi göreceksin.<br />
+                Görevin: <b>yanlış olanı bulmak</b> <br />
+                Doğru hamle = <b>+10 puan</b> 💥
               </Typography>
 
               <Stack direction="row" spacing={2} mt={3}>
-                <Button variant="contained" onClick={() => setStarted(true)}>
+                <Button variant="contained" onClick={() => setStarted(true)} disabled={!canStart}>
                   Başla
                 </Button>
               </Stack>
+
+              {!canStart && (
+                <Typography mt={2} sx={{ color: TEXT_COLOR, opacity: 0.85 }}>
+                  Oyun başlayamadı: Firestore’dan oyuncu verisi gelmedi.
+                </Typography>
+              )}
             </CardContent>
           </Card>
         ) : isFinished ? (
@@ -230,19 +211,19 @@ const Widget3true1wrong = () => {
                     </Typography>
 
                     <Typography sx={{ color: TEXT_COLOR, opacity: 0.95 }}>
-                        Bu linkten takım arkadaşlarının müzik zevklerine de ulaşabilirsin {" "}
-                        <a
-                            href="https://open.spotify.com/playlist/2M1JtdzNCKcQVhh8Yg7C5l?si=73xhm7lvRJWA3_FLCY0ZQA&pi=3ii14BltSeids"
-                            target="_blank"
-                            rel="noreferrer"
-                            style={{
-                            color: TEXT_COLOR,
-                            textDecoration: "underline",
-                            }}
-                        >
-                            Spotify listesini dinle
-                        </a>
-                        </Typography>
+                      Bu linkten takım arkadaşlarının müzik zevklerine de ulaşabilirsin{" "}
+                      <a
+                        href="https://open.spotify.com/playlist/2M1JtdzNCKcQVhh8Yg7C5l?si=73xhm7lvRJWA3_FLCY0ZQA&pi=3ii14BltSeids"
+                        target="_blank"
+                        rel="noreferrer"
+                        style={{
+                          color: TEXT_COLOR,
+                          textDecoration: "underline",
+                        }}
+                      >
+                        Spotify listesini dinle
+                      </a>
+                    </Typography>
                   </Stack>
                 );
               })()}
@@ -282,7 +263,6 @@ const Widget3true1wrong = () => {
                   const reveal = pickedText !== null;
                   const chosen = pickedText === opt.text;
 
-                 
                   const suffix =
                     reveal && chosen ? (opt.isTrue === false ? " ✅" : " ❌") : "";
 
@@ -327,4 +307,3 @@ const Widget3true1wrong = () => {
 };
 
 export default Widget3true1wrong;
-
