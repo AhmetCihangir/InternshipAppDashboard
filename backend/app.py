@@ -18,9 +18,9 @@ app = Flask(__name__)
 CORS(app)  # Enable CORS for React frontend
 
 
-def get_mock_tasks():
+def get_tasks():
     """
-    Generate mock task data for testing.
+    Generated mock task data for testing.
     Returns a list of task dictionaries with varied difficulty and completion status.
     
     Schema: {'id': int, 'title': str, 'difficulty': int (1-5), 'is_completed': bool, 'status': str, 'assignee': str, 'created_at': str, 'completed_at': str or None}
@@ -731,7 +731,7 @@ def get_productivity_stats():
     """
     try:
         # Get mock data
-        tasks = get_mock_tasks()
+        tasks = get_tasks()
         weekly_data = get_mock_weekly_efficiency()
         
         # Calculate statistics
