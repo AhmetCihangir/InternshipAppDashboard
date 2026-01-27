@@ -1,0 +1,15 @@
+{
+  "taskID": "345023495348053940383045",
+  "title": "Task title",
+  "description": "Task description",
+  "dueDate": "2026-02-01",
+  "priority": "High",
+  "departments": ["Platform"],
+  "status": "Pending",
+  "value": 5,
+
+  "createdBy": "u1",
+  "responsibleUsers": ["u2", "u3"],
+
+  "createdAt": "2026-01-27T10:45:12Z"
+}

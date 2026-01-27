@@ -5,6 +5,7 @@ from datetime import datetime, timezone
 
 class ToDo:
     def __init__(
+        #attributes
         self,
         title,
         description=None,
@@ -15,8 +16,9 @@ class ToDo:
         created_by=None,    
         responsible_users=None, 
         task_id=None,
-        status="Pending"
+        status="Pending",
     ):
+        #define attributes
         self.taskID = task_id or str(uuid.uuid4())
         self.title = title
         self.description = description
@@ -26,17 +28,18 @@ class ToDo:
         self.status = status
         self.value = value
 
-        self.createdBy = created_by or {"userID": None, "name": None, "emails": []}
+        self.createdBy = created_by
         self.responsibleUsers = responsible_users or []
-        self.createdAt = datetime.now(timezone.utc).isoformat()
+        self.createdAt = datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
 
+    #completion status
     def mark_completed(self):
         self.status = "Completed"
-
     def mark_not_completed(self):
         self.status = "Pending"
 
-    def to_dict(self):
+    #convert to JSON format
+    def to_json(self):
         return {
             "taskID": self.taskID,
             "title": self.title,

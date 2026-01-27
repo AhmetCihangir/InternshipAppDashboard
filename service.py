@@ -1,6 +1,25 @@
 #imports
-from typing import Dict, Optional, List
+from typing import Any, Dict, Optional, List
 from classes import ToDo
+
+#convert from JSON to Python task class
+def json_to_todo(data: Dict[str, Any]) -> ToDo:
+    title = data.get("title")
+    if not title:
+        raise ValueError("Missing required field: title")
+    return ToDo(
+        title=title,
+        description=data.get("description"),
+        due_date=data.get("dueDate"),
+        priority=data.get("priority"),
+        departments=data.get("departments", []),
+        value=data.get("value", 0),
+        created_by=data.get("createdBy"),
+        responsible_users=data.get("responsibleUsers", []),
+        task_id=data.get("taskID"),
+        status=data.get("status", "Pending"),
+        created_at=data.get("createdAt"),
+    )
 
 class ToDoService:
     def __init__(self) -> None:
@@ -15,7 +34,7 @@ class ToDoService:
         if not task:
             return False
 
-        if task.createdBy.get("userID") != request_user_id:
+        if task.createdBy != request_user_id:
             raise PermissionError("Only the creator can delete this task.")
 
         del self._tasks[task_id]
@@ -46,7 +65,8 @@ class ToDoService:
     def list_tasks(self) -> List[ToDo]:
         return list(self._tasks.values())
 
-    def _can_modify(self, task: ToDo, user_id: str) -> bool:
-        if task.createdBy.get("userID") == user_id:
-            return True
-        return any(u.get("userID") == user_id for u in task.responsibleUsers)
+    def _can_modify(self, task, user_id):
+        return (
+            task.createdBy == user_id
+            or user_id in task.responsibleUsers
+        )
