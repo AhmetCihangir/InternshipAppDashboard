@@ -3,61 +3,26 @@ Productivity/Efficiency Widget - Flask Backend
 ================================================
 A clean, modular Flask API that calculates user efficiency 
 based on tasks and returns visual charts as base64 images.
+
+Internship Simulation: 10 Interns, 5 Days (Mon-Fri), 200 Tasks
 """
 
 import io
 import base64
-from flask import Flask, jsonify
+from flask import Flask, jsonify, request
 from flask_cors import CORS
 import matplotlib
 matplotlib.use('Agg')  # Use non-GUI backend for server rendering
 import matplotlib.pyplot as plt
 import numpy as np
 
+# Import intern simulation data
+from intern_data import get_tasks
+
 app = Flask(__name__)
 CORS(app)  # Enable CORS for React frontend
 
-
-def get_tasks():
-    """
-    Generated mock task data for testing.
-    Returns a list of task dictionaries with varied difficulty and completion status.
-    
-    Schema: {'id': int, 'title': str, 'difficulty': int (1-5), 'is_completed': bool, 'status': str, 'assignee': str, 'created_at': str, 'completed_at': str or None}
-    """
-    from datetime import datetime, timedelta
-    import random
-    
-    base_date = datetime(2024, 1, 1)
-    
-    tasks = [
-        # High difficulty completed tasks (good for efficiency)
-        {"id": 1, "title": "Implement API Authentication", "difficulty": 5, "is_completed": True, "status": "done", "assignee": "Alice", "created_at": (base_date + timedelta(days=random.randint(0,30))).strftime('%Y-%m-%d'), "completed_at": (base_date + timedelta(days=random.randint(31,60))).strftime('%Y-%m-%d')},
-        {"id": 2, "title": "Database Schema Design", "difficulty": 4, "is_completed": True, "status": "done", "assignee": "Bob", "created_at": (base_date + timedelta(days=random.randint(0,30))).strftime('%Y-%m-%d'), "completed_at": (base_date + timedelta(days=random.randint(31,60))).strftime('%Y-%m-%d')},
-        {"id": 3, "title": "Setup CI/CD Pipeline", "difficulty": 5, "is_completed": True, "status": "done", "assignee": "Charlie", "created_at": (base_date + timedelta(days=random.randint(0,30))).strftime('%Y-%m-%d'), "completed_at": (base_date + timedelta(days=random.randint(31,60))).strftime('%Y-%m-%d')},
-        
-        # Medium difficulty mixed
-        {"id": 4, "title": "Write Unit Tests", "difficulty": 3, "is_completed": True, "status": "done", "assignee": "Diana", "created_at": (base_date + timedelta(days=random.randint(0,30))).strftime('%Y-%m-%d'), "completed_at": (base_date + timedelta(days=random.randint(31,60))).strftime('%Y-%m-%d')},
-        {"id": 5, "title": "Code Review Session", "difficulty": 2, "is_completed": True, "status": "done", "assignee": "Alice", "created_at": (base_date + timedelta(days=random.randint(0,30))).strftime('%Y-%m-%d'), "completed_at": (base_date + timedelta(days=random.randint(31,60))).strftime('%Y-%m-%d')},
-        {"id": 6, "title": "API Documentation", "difficulty": 3, "is_completed": False, "status": "doing", "assignee": "Bob", "created_at": (base_date + timedelta(days=random.randint(0,30))).strftime('%Y-%m-%d'), "completed_at": None},
-        {"id": 7, "title": "Bug Fix: Login Issue", "difficulty": 3, "is_completed": True, "status": "done", "assignee": "Charlie", "created_at": (base_date + timedelta(days=random.randint(0,30))).strftime('%Y-%m-%d'), "completed_at": (base_date + timedelta(days=random.randint(31,60))).strftime('%Y-%m-%d')},
-        
-        # Low difficulty tasks
-        {"id": 8, "title": "Update README", "difficulty": 1, "is_completed": True, "status": "done", "assignee": "Diana", "created_at": (base_date + timedelta(days=random.randint(0,30))).strftime('%Y-%m-%d'), "completed_at": (base_date + timedelta(days=random.randint(31,60))).strftime('%Y-%m-%d')},
-        {"id": 9, "title": "Team Meeting Notes", "difficulty": 1, "is_completed": True, "status": "done", "assignee": "Alice", "created_at": (base_date + timedelta(days=random.randint(0,30))).strftime('%Y-%m-%d'), "completed_at": (base_date + timedelta(days=random.randint(31,60))).strftime('%Y-%m-%d')},
-        {"id": 10, "title": "Email Status Report", "difficulty": 1, "is_completed": False, "status": "todo", "assignee": "Bob", "created_at": (base_date + timedelta(days=random.randint(0,30))).strftime('%Y-%m-%d'), "completed_at": None},
-        
-        # Incomplete high difficulty (impacts efficiency negatively)
-        {"id": 11, "title": "Microservices Migration", "difficulty": 5, "is_completed": False, "status": "doing", "assignee": "Charlie", "created_at": (base_date + timedelta(days=random.randint(0,30))).strftime('%Y-%m-%d'), "completed_at": None},
-        {"id": 12, "title": "Performance Optimization", "difficulty": 4, "is_completed": False, "status": "todo", "assignee": "Diana", "created_at": (base_date + timedelta(days=random.randint(0,30))).strftime('%Y-%m-%d'), "completed_at": None},
-        
-        # Additional varied tasks
-        {"id": 13, "title": "Frontend Integration", "difficulty": 4, "is_completed": True, "status": "done", "assignee": "Alice", "created_at": (base_date + timedelta(days=random.randint(0,30))).strftime('%Y-%m-%d'), "completed_at": (base_date + timedelta(days=random.randint(31,60))).strftime('%Y-%m-%d')},
-        {"id": 14, "title": "Security Audit Prep", "difficulty": 4, "is_completed": True, "status": "done", "assignee": "Bob", "created_at": (base_date + timedelta(days=random.randint(0,30))).strftime('%Y-%m-%d'), "completed_at": (base_date + timedelta(days=random.randint(31,60))).strftime('%Y-%m-%d')},
-        {"id": 15, "title": "Onboarding Docs", "difficulty": 2, "is_completed": False, "status": "todo", "assignee": "Charlie", "created_at": (base_date + timedelta(days=random.randint(0,30))).strftime('%Y-%m-%d'), "completed_at": None},
-    ]
-    
-    return tasks
+# get_tasks is now imported from intern_data.py
 
 
 def get_mock_weekly_efficiency():
@@ -118,30 +83,35 @@ def _create_base64_image(fig):
 
 
 def generate_difficulty_pie_chart(tasks):
-    # Count tasks by difficulty level
-    difficulty_counts = {1: 0, 2: 0, 3: 0, 4: 0, 5: 0}
+    # Count tasks by difficulty level (Fibonacci story points: 1,2,3,5,8)
+    difficulty_counts = {1: 0, 2: 0, 3: 0, 5: 0, 8: 0}
     for task in tasks:
-        difficulty_counts[task["difficulty"]] += 1
+        diff = task["difficulty"]
+        if diff in difficulty_counts:
+            difficulty_counts[diff] += 1
+        else:
+            # Map any other values to closest Fibonacci
+            difficulty_counts[min(difficulty_counts.keys(), key=lambda x: abs(x - diff))] += 1
     
     # Filter out zero counts
     labels = []
     sizes = []
-    colors = ['#00d4aa', '#00b4d8', '#4895ef', '#7b68ee', '#e040fb']
+    colors = {'1': '#00d4aa', '2': '#00b4d8', '3': '#4895ef', '5': '#7b68ee', '8': '#e040fb'}
     filtered_colors = []
     
     difficulty_names = {
-        1: 'Very Easy (1)',
+        1: 'Trivial (1)',
         2: 'Easy (2)', 
         3: 'Medium (3)',
-        4: 'Hard (4)',
-        5: 'Very Hard (5)'
+        5: 'Hard (5)',
+        8: 'Complex (8)'
     }
     
     for diff, count in difficulty_counts.items():
         if count > 0:
             labels.append(difficulty_names[diff])
             sizes.append(count)
-            filtered_colors.append(colors[diff - 1])
+            filtered_colors.append(colors[str(diff)])
     
     # Create pie chart
     fig, ax = plt.subplots(figsize=(6, 5))
