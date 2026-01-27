@@ -242,6 +242,10 @@ const WidgetToDoList = () => {
                 .todoScope .btn {
                 color: #fff;
                 }
+                .todoScope .btnSuccess { 
+                background: rgba(0,255,120,0.14); 
+                border-color: rgba(0,255,120,0.26); 
+                }
 
                 .todoScope { display:flex; flex-direction:column; gap:12px; }
 
@@ -456,8 +460,14 @@ const WidgetToDoList = () => {
                                     >
                                         <div className="main" onClick={() => setSelectedTask(t)}>
                                             <div className={`title ${done ? "titleDone" : ""}`}>
-                                                {t.title}
-                                            </div>
+                                                {[
+                                                    t.title,
+                                                    t.description?.trim() ? `— ${t.description.trim()}` : null,
+                                                    t.dueDate ? `• Due: ${t.dueDate}` : null,
+                                                ]
+                                                    .filter(Boolean)
+                                                    .join(" ")}
+                                                </div>
                                             <div className="sub">
                                                 <span
                                                     className={`pill ${
@@ -471,14 +481,25 @@ const WidgetToDoList = () => {
                                             </div>
                                         </div>
 
-                                        <button
-                                            className="btn btnDanger"
-                                            onClick={() => deleteTask(t)}
-                                            disabled={busyId === t.taskID}
-                                            title="Delete"
-                                        >
-                                            ✕
-                                        </button>
+                                        <div style={{ display: "flex", gap: 10 }}>
+                                            <button
+                                                className={`btn ${t.status === "Completed" ? "btnGhost" : "btnSuccess"}`}
+                                                onClick={() => toggleTaskStatus(t)}
+                                                disabled={busyId === t.taskID}
+                                                title={t.status === "Completed" ? "Mark as incomplete" : "Mark as completed"}
+                                            >
+                                                {t.status === "Completed" ? "↩ Incomplete" : "✓ Complete"}
+                                            </button>
+
+                                            <button
+                                                className="btn btnDanger"
+                                                onClick={() => deleteTask(t)}
+                                                disabled={busyId === t.taskID}
+                                                title="Delete"
+                                            >
+                                                ✕
+                                            </button>
+                                        </div>
                                     </li>
                                 );
                             })}
