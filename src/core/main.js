@@ -38,7 +38,7 @@ const LoginPage = () => {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
 
-    const { login, user, loading, setLoading } = useAuth();
+    const { login, user, setLoading } = useAuth();
     const { setInternList, setTodoList } = useStateContext();
 
     const handleLogin = async () => {
