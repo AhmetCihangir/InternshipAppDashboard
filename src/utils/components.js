@@ -67,9 +67,11 @@ export function Widget({ children, title = "", height = "25vh", width = "100%", 
                 onClose={handleClose}
                 TransitionComponent={Transition}
             >
-                <Box p={4} sx={{
+                <Box sx={{
                     backgroundColor: BG_COLOR,
-                    minHeight : '150vh',
+                    minHeight: '100vh',
+                    px: 0,
+                    py: 4,
                 }}>
                     <IconButton edge="start" sx={{
                         color: TEXT_COLOR

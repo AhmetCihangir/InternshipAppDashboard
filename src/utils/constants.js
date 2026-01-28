@@ -1,4 +1,4 @@
-const WidgetNames = ["3 True 1 Wrong", "Auto Mailing", "Pie Chart", "Profil", "To Do List"];
+const WidgetNames = ["3 True 1 Wrong", "Auto Mailing", "Productivity", "Profil", "To Do List"];
 
 const BG_COLOR = "#03045e";
 const TEXT_COLOR = "#caf0f8";

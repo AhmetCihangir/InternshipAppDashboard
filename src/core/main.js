@@ -43,20 +43,20 @@ const LoginPage = () => {
 
     const handleLogin = async () => {
         try {
-            await login(email, password);
+            const credential = await login(email, password);
 
-            if (user) {
+            if (credential && credential.user) {
                 const interns = await getAllUsers();
-                
+
                 setInternList(interns);
-                
+
                 const allTodos = await getAllTodos(interns);
-                
+
                 setTodoList(allTodos);
-                
+
                 console.log("Fetched Todos: ", allTodos);
                 console.log("Fetched Interns: ", interns);
-                console.log("Login successful for user: ", user.getName());
+                console.log("Login successful for user: ", credential.user.email);
                 setLoading(false);
             }
         } catch (error) {
